@@ -1,0 +1,1565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>108 Fleet Management — Sumeet Facilities</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #080c10;
+  --surface: #0e1520;
+  --surface2: #141d2a;
+  --surface3: #1a2535;
+  --border: #1f2e42;
+  --accent: #e63946;
+  --green: #00c67a;
+  --gold: #f5a623;
+  --blue: #3b82f6;
+  --purple: #8b5cf6;
+  --text: #e2eaf6;
+  --muted: #5a7296;
+  --muted2: #8ba0bb;
+  --danger: #ef4444;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:var(--surface);}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+/* ── GLOW BACKGROUND ── */
+body::before{content:'';position:fixed;top:-20%;left:50%;width:600px;height:600px;background:radial-gradient(circle,rgba(230,57,70,0.06) 0%,transparent 70%);transform:translateX(-50%);pointer-events:none;z-index:0;}
+
+/* ── LOGIN ── */
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;z-index:1;}
+#login-screen::after{content:'108';position:absolute;font-family:'Rajdhani',sans-serif;font-size:38vw;font-weight:700;color:rgba(230,57,70,0.025);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;letter-spacing:-4vw;}
+
+.login-card{background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--accent);padding:44px 36px;width:440px;max-width:94vw;position:relative;z-index:2;box-shadow:0 24px 80px rgba(0,0,0,0.5);}
+.login-org{font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:var(--accent);margin-bottom:10px;}
+.login-title{font-family:'Rajdhani',sans-serif;font-size:34px;font-weight:700;letter-spacing:2px;line-height:1;margin-bottom:6px;}
+.login-sub{font-size:12px;color:var(--muted);margin-bottom:32px;letter-spacing:.5px;}
+
+.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px;}
+.role-btn{padding:18px 12px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .2s;text-align:center;line-height:1.4;}
+.role-btn span{display:block;font-size:22px;margin-bottom:6px;}
+.role-btn:hover{border-color:rgba(230,57,70,0.5);color:var(--text);}
+.role-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(230,57,70,0.07);}
+
+.form-group{margin-bottom:18px;}
+.form-label{display:block;font-size:10px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+
+input,select,textarea{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s;-webkit-appearance:none;}
+input:focus,select:focus,textarea:focus{border-color:rgba(59,130,246,0.6);}
+select option{background:var(--surface2);}
+textarea{resize:vertical;min-height:75px;}
+input::placeholder,textarea::placeholder{color:var(--muted);}
+
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border:none;transition:all .2s;white-space:nowrap;}
+.btn-primary{background:var(--accent);color:white;}
+.btn-primary:hover{background:#c1121f;}
+.btn-success{background:var(--green);color:#080c10;}
+.btn-success:hover{opacity:.85;}
+.btn-warning{background:var(--gold);color:#080c10;}
+.btn-warning:hover{opacity:.85;}
+.btn-danger{background:var(--danger);color:white;}
+.btn-danger:hover{opacity:.85;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted2);}
+.btn-outline:hover{border-color:var(--muted2);color:var(--text);}
+.btn-blue{background:var(--blue);color:white;}
+.btn-blue:hover{opacity:.85;}
+.btn-purple{background:var(--purple);color:white;}
+.btn-purple:hover{opacity:.85;}
+.btn-full{width:100%;justify-content:center;}
+.btn-sm{padding:6px 12px;font-size:11px;}
+.btn-lg{padding:13px 32px;font-size:15px;}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+
+.login-error{background:rgba(239,68,68,.12);border:1px solid var(--danger);color:#fca5a5;padding:10px 14px;font-size:12px;margin-bottom:14px;display:none;}
+.demo-creds{margin-top:18px;padding:12px;background:var(--surface2);border:1px solid var(--border);font-size:11px;color:var(--muted);line-height:2;}
+
+/* ── APP SHELL ── */
+#app{display:none;position:relative;z-index:1;}
+
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.topbar-brand{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;letter-spacing:2px;display:flex;align-items:center;gap:10px;}
+.brand-num{background:var(--accent);color:white;font-size:12px;padding:3px 9px;font-weight:700;letter-spacing:1px;}
+.topbar-right{display:flex;align-items:center;gap:12px;}
+.role-pill{display:flex;align-items:center;gap:7px;padding:5px 12px;border:1px solid var(--border);background:var(--surface2);font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;}
+.role-pill .dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+
+/* ── NAV ── */
+.nav-wrap{background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;}
+.nav-tabs{display:flex;padding:0 20px;gap:0;white-space:nowrap;}
+.nav-tab{padding:13px 18px;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;transition:all .2s;}
+.nav-tab:hover{color:var(--text);}
+.nav-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.nav-tab[data-role="fleet"] .tab-lock{font-size:9px;margin-left:4px;opacity:.5;}
+
+/* ── STATS BAR ── */
+.stats-bar{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid var(--border);background:var(--surface);}
+.stat-item{padding:14px 16px;border-right:1px solid var(--border);}
+.stat-item:last-child{border-right:none;}
+.stat-lbl{font-size:9px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+.stat-val{font-family:'Rajdhani',sans-serif;font-size:26px;font-weight:700;line-height:1;margin-bottom:2px;}
+.stat-sub{font-size:10px;color:var(--muted);}
+.sv-green{color:var(--green);}
+.sv-red{color:var(--accent);}
+.sv-gold{color:var(--gold);}
+.sv-blue{color:var(--blue);}
+.sv-purple{color:var(--purple);}
+
+/* ── PAGES ── */
+.page{display:none;padding:20px;}
+.page.active{display:block;}
+.page-title{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:18px;}
+
+/* ── DASHBOARD ── */
+.dash-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px;}
+.dash-mini{background:var(--surface);border:1px solid var(--border);padding:18px 20px;position:relative;overflow:hidden;}
+.dash-mini::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;}
+.dash-mini.dm-green::after{background:var(--green);}
+.dash-mini.dm-red::after{background:var(--accent);}
+.dash-mini.dm-gold::after{background:var(--gold);}
+.dash-mini.dm-blue::after{background:var(--blue);}
+.dm-icon{font-size:28px;margin-bottom:10px;}
+.dm-val{font-family:'Rajdhani',sans-serif;font-size:36px;font-weight:700;line-height:1;margin-bottom:4px;}
+.dm-lbl{font-size:11px;color:var(--muted);letter-spacing:.5px;}
+.dm-change{font-size:11px;margin-top:6px;}
+
+.chart-grid{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px;}
+.chart-grid-2{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+.chart-box{background:var(--surface);border:1px solid var(--border);padding:20px 22px;}
+.chart-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.chart-ttl{font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--muted2);}
+.chart-canvas-wrap{position:relative;}
+
+/* ── TABLE ── */
+.toolbar{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+.search-wrap{flex:1;min-width:180px;position:relative;}
+.search-wrap input{padding-left:34px;}
+.search-wrap::before{content:'⌕';position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:17px;z-index:1;}
+.table-wrap{border:1px solid var(--border);overflow-x:auto;background:var(--surface);}
+table{width:100%;border-collapse:collapse;font-size:12.5px;}
+th{background:var(--surface2);padding:9px 13px;text-align:left;font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap;}
+td{padding:9px 13px;border-bottom:1px solid rgba(31,46,66,.6);color:var(--text);vertical-align:middle;white-space:nowrap;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,.02);}
+.tbl-count{font-size:11px;color:var(--muted);margin-top:8px;}
+
+/* ── STATUS BADGES ── */
+.badge{display:inline-block;padding:3px 9px;font-family:'Rajdhani',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;}
+.badge-onroad{background:rgba(0,198,122,.12);color:var(--green);}
+.badge-offroad{background:rgba(230,57,70,.12);color:var(--accent);}
+.badge-pending{background:rgba(245,166,35,.12);color:var(--gold);}
+.badge-approved{background:rgba(59,130,246,.12);color:var(--blue);}
+.badge-under{background:rgba(139,92,246,.12);color:var(--purple);}
+.badge-closed{background:rgba(0,198,122,.12);color:var(--green);}
+
+/* ── FORM ── */
+.form-card{background:var(--surface);border:1px solid var(--border);padding:24px 28px;margin-bottom:20px;}
+.form-card-title{font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+.form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.span2{grid-column:span 2;}
+.span3{grid-column:span 3;}
+.req::after{content:' *';color:var(--accent);}
+
+/* ── APPROVAL CARD ── */
+.approval-card{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--gold);padding:18px 20px;margin-bottom:12px;}
+.approval-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
+.approval-id{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;color:var(--gold);}
+.approval-meta{font-size:11px;color:var(--muted);margin-top:2px;}
+.approval-body{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px;}
+.ab-lbl{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:3px;}
+.ab-val{font-size:14px;font-family:'Rajdhani',sans-serif;font-weight:700;}
+.approval-actions{display:flex;gap:8px;}
+
+/* ── MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--accent);width:920px;max-width:96vw;max-height:92vh;overflow-y:auto;padding:28px 30px;}
+.modal-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;}
+.modal-ttl{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;letter-spacing:1px;}
+.modal-close{background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;}
+.modal-close:hover{color:var(--accent);}
+
+/* ── FIELD LOG MODAL ── */
+.log-entry{background:var(--surface2);border:1px solid var(--border);padding:14px 16px;margin-bottom:10px;position:relative;}
+.log-entry::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--blue);}
+.log-entry-meta{font-size:10px;color:var(--muted);margin-bottom:5px;letter-spacing:.5px;}
+.log-entry-text{font-size:13px;line-height:1.5;}
+
+/* ── REPORTS ── */
+.report-filters{background:var(--surface);border:1px solid var(--border);padding:18px 20px;margin-bottom:18px;display:grid;grid-template-columns:repeat(5,1fr) auto;gap:14px;align-items:end;}
+.report-summary{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:18px;}
+.rs-card{background:var(--surface);border:1px solid var(--border);padding:16px 18px;}
+.rs-lbl{font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+.rs-val{font-family:'Rajdhani',sans-serif;font-size:26px;font-weight:700;}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--green);padding:12px 18px;font-size:13px;z-index:999;opacity:0;transform:translateY(12px);transition:all .25s;pointer-events:none;max-width:320px;}
+.toast.show{opacity:1;transform:translateY(0);}
+.toast.error{border-left-color:var(--accent);}
+.toast.info{border-left-color:var(--blue);}
+
+/* ── LOADING ── */
+.loading-overlay{display:none;position:fixed;inset:0;background:rgba(8,12,16,.85);z-index:300;align-items:center;justify-content:center;flex-direction:column;gap:14px;}
+.loading-overlay.active{display:flex;}
+.spinner{width:36px;height:36px;border:3px solid rgba(255,255,255,.1);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-overlay p{font-family:'Rajdhani',sans-serif;font-size:14px;letter-spacing:3px;color:var(--muted);}
+
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:50px 20px;color:var(--muted);}
+.empty h3{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;letter-spacing:1px;margin-bottom:6px;color:var(--text);}
+
+/* ── ALERT BANNER ── */
+.banner{padding:10px 18px;font-size:12px;margin:0;border-bottom:1px solid;}
+.banner-warn{background:rgba(245,166,35,.08);color:var(--gold);border-bottom-color:rgba(245,166,35,.25);}
+.banner-info{background:rgba(59,130,246,.08);color:#93c5fd;border-bottom-color:rgba(59,130,246,.25);}
+
+/* ── SECTION DIVIDER ── */
+.sec-div{font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--accent);padding:8px 0;border-bottom:1px solid var(--border);margin:20px 0 16px;grid-column:1/-1;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .stats-bar{grid-template-columns:repeat(4,1fr);}
+  .chart-grid{grid-template-columns:1fr;}
+  .chart-grid-2{grid-template-columns:1fr 1fr;}
+  .form-grid{grid-template-columns:1fr 1fr;}
+  .dash-grid{grid-template-columns:repeat(2,1fr);}
+  .report-filters{grid-template-columns:1fr 1fr;}
+  .report-summary{grid-template-columns:repeat(3,1fr);}
+}
+@media(max-width:600px){
+  .stats-bar{grid-template-columns:repeat(2,1fr);}
+  .form-grid{grid-template-columns:1fr;}
+  .chart-grid-2{grid-template-columns:1fr;}
+  .dash-grid{grid-template-columns:1fr 1fr;}
+  .topbar-brand span:not(.brand-num){display:none;}
+  .report-filters{grid-template-columns:1fr;}
+  .approval-body{grid-template-columns:1fr 1fr;}
+}
+.config-warn{background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.3);color:var(--gold);padding:10px 16px;font-size:12px;margin-bottom:16px;}
+
+/* ── INVOICE DELTA ── */
+.delta-positive{color:var(--green);}
+.delta-negative{color:var(--accent);}
+.inv-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);}
+.inv-row:last-child{border-bottom:none;}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loading"><div class="spinner"></div><p>CONNECTING...</p></div>
+<div class="toast" id="toast"></div>
+
+<!-- ═══════════ LOGIN ═══════════ -->
+<div id="login-screen">
+<div class="login-card">
+  <div class="login-org">Sumeet Facilities Ltd · Pune</div>
+  <div class="login-title">108 FLEET SYSTEM</div>
+  <div class="login-sub">Maharashtra Emergency Medical Services</div>
+
+  <div class="form-group">
+    <div class="form-label">Select Your Role</div>
+    <div class="role-grid">
+      <button class="role-btn active" id="role-field" onclick="selectRole('field')">
+        <span>🚑</span>Field Team<br><small style="font-size:10px;opacity:.6">Raise / Update Request</small>
+      </button>
+      <button class="role-btn" id="role-fleet" onclick="selectRole('fleet')">
+        <span>🏢</span>Fleet Desk<br><small style="font-size:10px;opacity:.6">Approve / Manage / Reports</small>
+      </button>
+    </div>
+  </div>
+
+  <div id="fleet-username-wrap" style="display:none">
+    <div class="form-group">
+      <label class="form-label">Username</label>
+      <input type="text" id="login-user" placeholder="fleet_admin" autocomplete="off">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Password / PIN</label>
+    <input type="password" id="login-pass" placeholder="••••••••">
+  </div>
+  <div class="login-error" id="login-error">Invalid credentials. Try again.</div>
+  <button class="btn btn-primary btn-full btn-lg" onclick="doLogin()">ENTER SYSTEM</button>
+
+  <div class="demo-creds">
+    <strong style="color:var(--gold)">DEMO CREDENTIALS</strong><br>
+    Field Team PIN: <code style="color:var(--text)">field108</code><br>
+    Fleet Desk — User: <code style="color:var(--text)">fleet_admin</code> &nbsp;|&nbsp; PIN: <code style="color:var(--text)">fleet@108</code>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════ MAIN APP ═══════════ -->
+<div id="app">
+
+<div class="topbar">
+  <div class="topbar-brand">
+    <span class="brand-num">108</span>
+    <span>FLEET MANAGEMENT SYSTEM</span>
+  </div>
+  <div class="topbar-right">
+    <div class="role-pill"><div class="dot"></div><span id="user-label">FIELD</span></div>
+    <button class="btn btn-outline btn-sm" onclick="logout()">LOGOUT</button>
+  </div>
+</div>
+
+<div id="banner-wrap"></div>
+
+<!-- STATS BAR (Fleet Desk only) -->
+<div class="stats-bar" id="stats-bar" style="display:none">
+  <div class="stat-item"><div class="stat-lbl">Total Requests</div><div class="stat-val" id="s-total">—</div><div class="stat-sub">all time</div></div>
+  <div class="stat-item"><div class="stat-lbl">Under Repair</div><div class="stat-val sv-purple" id="s-repair">—</div><div class="stat-sub">in workshop</div></div>
+  <div class="stat-item"><div class="stat-lbl">On Road</div><div class="stat-val sv-green" id="s-onroad">—</div><div class="stat-sub">operational</div></div>
+  <div class="stat-item"><div class="stat-lbl">Off Road</div><div class="stat-val sv-red" id="s-offroad">—</div><div class="stat-sub">not operational</div></div>
+  <div class="stat-item"><div class="stat-lbl">Pending Approval</div><div class="stat-val sv-gold" id="s-pending">—</div><div class="stat-sub">awaiting fleet desk</div></div>
+  <div class="stat-item"><div class="stat-lbl">Total Invoice</div><div class="stat-val sv-blue" id="s-invoice">—</div><div class="stat-sub">final paid</div></div>
+  <div class="stat-item"><div class="stat-lbl">Cost Saved</div><div class="stat-val sv-green" id="s-saved">—</div><div class="stat-sub">est. vs invoice</div></div>
+</div>
+
+<div class="nav-wrap">
+  <div class="nav-tabs" id="nav-tabs"></div>
+</div>
+
+<!-- ───────── DASHBOARD ───────── -->
+<div class="page" id="page-dashboard">
+  <div class="dash-grid">
+    <div class="dash-mini dm-red">
+      <div class="dm-icon">🔴</div>
+      <div class="dm-val sv-red" id="dm-offroad">0</div>
+      <div class="dm-lbl">Vehicles Off Road</div>
+    </div>
+    <div class="dash-mini dm-purple">
+      <div class="dm-icon">🔧</div>
+      <div class="dm-val sv-purple" id="dm-repair">0</div>
+      <div class="dm-lbl">Under Repair</div>
+    </div>
+    <div class="dash-mini dm-gold">
+      <div class="dm-icon">⏳</div>
+      <div class="dm-val sv-gold" id="dm-pending">0</div>
+      <div class="dm-lbl">Pending Approval</div>
+    </div>
+    <div class="dash-mini dm-green">
+      <div class="dm-icon">✅</div>
+      <div class="dm-val sv-green" id="dm-onroad">0</div>
+      <div class="dm-lbl">On Road</div>
+    </div>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-box">
+      <div class="chart-hdr">
+        <div class="chart-ttl">Monthly Cost — Estimate vs Final Invoice</div>
+      </div>
+      <div class="chart-canvas-wrap"><canvas id="chart-monthly" height="220"></canvas></div>
+    </div>
+    <div class="chart-box">
+      <div class="chart-hdr"><div class="chart-ttl">Vehicle Status</div></div>
+      <div class="chart-canvas-wrap"><canvas id="chart-status" height="220"></canvas></div>
+    </div>
+  </div>
+
+  <div class="chart-grid-2">
+    <div class="chart-box">
+      <div class="chart-hdr"><div class="chart-ttl">Top Breakdown Complaints</div></div>
+      <div class="chart-canvas-wrap"><canvas id="chart-complaint" height="220"></canvas></div>
+    </div>
+    <div class="chart-box">
+      <div class="chart-hdr"><div class="chart-ttl">Cost Per Vehicle (Top 8)</div></div>
+      <div class="chart-canvas-wrap"><canvas id="chart-cost" height="220"></canvas></div>
+    </div>
+    <div class="chart-box">
+      <div class="chart-hdr"><div class="chart-ttl">Towing Requests</div></div>
+      <div class="chart-canvas-wrap"><canvas id="chart-towing" height="220"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- ───────── DATA SHEET (Fleet Desk) ───────── -->
+<div class="page" id="page-datasheet">
+  <div id="fleet-config-warn" class="config-warn" style="display:none">
+    ⚠️ Google Sheet not connected. Configure your Apps Script URL to enable live sync.
+  </div>
+  <div class="toolbar">
+    <div class="search-wrap"><input type="text" id="search-input" placeholder="Search vehicle, complaint…" oninput="filterTable()"></div>
+    <select id="f-status-filter" onchange="filterTable()" style="width:130px">
+      <option value="">All Status</option>
+      <option value="On Road">On Road</option>
+      <option value="Off Road">Off Road</option>
+      <option value="Under Repair">Under Repair</option>
+    </select>
+    <select id="f-approval-filter" onchange="filterTable()" style="width:150px">
+      <option value="">All Approvals</option>
+      <option value="Pending">Pending</option>
+      <option value="Approved">Approved</option>
+      <option value="Closed">Closed</option>
+    </select>
+    <button class="btn btn-outline btn-sm" onclick="loadData()">↻ Refresh</button>
+    <button class="btn btn-outline btn-sm" onclick="exportCSV()">⬇ CSV</button>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Date</th>
+          <th>Reg No</th>
+          <th>Cluster</th>
+          <th>Complaint</th>
+          <th>Workshop</th>
+          <th>Status</th>
+          <th>Approval</th>
+          <th>Est. (₹)</th>
+          <th>Final Invoice (₹)</th>
+          <th>Saving (₹)</th>
+          <th>Off Road Days</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="data-tbody"></tbody>
+    </table>
+  </div>
+  <div id="tbl-empty" class="empty" style="display:none"><h3>No Records Found</h3><p>Adjust your filters or raise the first request.</p></div>
+  <div class="tbl-count" id="tbl-count"></div>
+</div>
+
+<!-- ───────── APPROVALS (Fleet Desk) ───────── -->
+<div class="page" id="page-approvals">
+  <div id="approvals-list"></div>
+  <div id="approvals-empty" class="empty" style="display:none"><h3>All Clear!</h3><p>No requests pending approval.</p></div>
+</div>
+
+<!-- ───────── REPORTS (Fleet Desk) ───────── -->
+<div class="page" id="page-reports">
+  <div class="report-filters">
+    <div class="form-group" style="margin:0"><label class="form-label">From Date</label><input type="date" id="rpt-from"></div>
+    <div class="form-group" style="margin:0"><label class="form-label">To Date</label><input type="date" id="rpt-to"></div>
+    <div class="form-group" style="margin:0"><label class="form-label">Status</label>
+      <select id="rpt-status"><option value="">All</option><option>On Road</option><option>Off Road</option><option>Under Repair</option></select>
+    </div>
+    <div class="form-group" style="margin:0"><label class="form-label">Cluster</label><select id="rpt-cluster"><option value="">All Clusters</option></select></div>
+    <div class="form-group" style="margin:0"><label class="form-label">Approval</label>
+      <select id="rpt-approval"><option value="">All</option><option>Pending</option><option>Approved</option><option>Closed</option></select>
+    </div>
+    <button class="btn btn-primary" onclick="genReport()">GENERATE</button>
+  </div>
+  <div id="report-output"></div>
+</div>
+
+<!-- ───────── RAISE REQUEST (Field Team) ───────── -->
+<div class="page" id="page-raise">
+  <div style="max-width:860px;margin:0 auto">
+    <div style="font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;letter-spacing:1px;margin-bottom:4px">RAISE BREAKDOWN REQUEST</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:22px;">Fields marked * are required. Fleet Desk will process the request after submission.</div>
+
+    <!-- VEHICLE DETAILS -->
+    <div class="form-card">
+      <div class="form-card-title">🚑 Vehicle & Location</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label req">Date of Report</label>
+          <input type="date" id="f-date">
+        </div>
+        <div class="form-group">
+          <label class="form-label req">Vehicle Reg No</label>
+          <input type="text" id="f-regno" placeholder="MH14CL…">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Cluster No</label>
+          <input type="text" id="f-cluster" placeholder="C1, C2…">
+        </div>
+        <div class="form-group">
+          <label class="form-label">District</label>
+          <input type="text" id="f-district" value="Pune">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Vehicle Make</label>
+          <input type="text" id="f-make" placeholder="Force Motors…">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Model</label>
+          <input type="text" id="f-model" placeholder="Traveller…">
+        </div>
+      </div>
+    </div>
+
+    <!-- BREAKDOWN DETAILS -->
+    <div class="form-card">
+      <div class="form-card-title">🔴 Breakdown Details</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Odometer (km)</label>
+          <input type="number" id="f-odo" placeholder="km reading">
+        </div>
+        <div class="form-group">
+          <label class="form-label req">Breakdown Date</label>
+          <input type="date" id="f-bddate">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Breakdown Time</label>
+          <input type="time" id="f-bdtime">
+        </div>
+        <div class="form-group span3">
+          <label class="form-label req">Breakdown Complaint</label>
+          <textarea id="f-complaint" placeholder="Describe the issue in detail — what happened, symptoms, location where broke down…"></textarea>
+        </div>
+        <div class="form-group span3">
+          <label class="form-label">Immediate Action Taken</label>
+          <textarea id="f-action" placeholder="What steps were taken on the spot…"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- INITIAL COST REQUEST -->
+    <div class="form-card">
+      <div class="form-card-title">💰 Workshop & Initial Estimate</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Towing Required?</label>
+          <select id="f-towing"><option value="No">No</option><option value="Yes">Yes</option></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Towing Vendor</label>
+          <input type="text" id="f-towvendor">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Workshop Name</label>
+          <input type="text" id="f-workshop" placeholder="Workshop / garage">
+        </div>
+        <div class="form-group">
+          <label class="form-label req">Initial Estimate Quoted (₹)</label>
+          <input type="number" id="f-estimate" placeholder="Workshop quote amount">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Advance Paid (₹)</label>
+          <input type="number" id="f-advance">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Remarks</label>
+          <input type="text" id="f-remarks" placeholder="Any additional notes…">
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:12px;margin-bottom:40px">
+      <button class="btn btn-success btn-lg" onclick="saveEntry()">✓ SUBMIT REQUEST</button>
+      <button class="btn btn-outline" onclick="clearForm()">CLEAR FORM</button>
+    </div>
+  </div>
+</div>
+
+<!-- ───────── MY REQUESTS (Field Team) ───────── -->
+<div class="page" id="page-myrequests">
+  <div style="max-width:900px;margin:0 auto">
+    <div class="toolbar">
+      <button class="btn btn-outline btn-sm" onclick="loadData()">↻ Refresh</button>
+    </div>
+    <div id="field-requests-list"></div>
+    <div id="field-requests-empty" class="empty" style="display:none"><h3>No Requests Yet</h3><p>Submit your first breakdown request.</p></div>
+  </div>
+</div>
+
+</div><!-- end #app -->
+
+<!-- ═══ EDIT / APPROVE MODAL ═══ -->
+<div class="modal-overlay" id="edit-modal">
+<div class="modal">
+  <div class="modal-hdr">
+    <div class="modal-ttl" id="edit-modal-title">EDIT REQUEST</div>
+    <button class="modal-close" onclick="closeModal('edit-modal')">✕</button>
+  </div>
+  <div id="edit-modal-body"></div>
+</div>
+</div>
+
+<!-- ═══ ADD FIELD LOG MODAL ═══ -->
+<div class="modal-overlay" id="log-modal">
+<div class="modal" style="max-width:600px">
+  <div class="modal-hdr">
+    <div class="modal-ttl">ADD UPDATE / LOG</div>
+    <button class="modal-close" onclick="closeModal('log-modal')">✕</button>
+  </div>
+  <div>
+    <div class="form-group"><label class="form-label">Update / Progress Note *</label><textarea id="log-text" placeholder="Describe the update, repair progress, additional parts needed…" style="min-height:110px"></textarea></div>
+    <div class="form-group">
+      <label class="form-label">Updated Status</label>
+      <select id="log-status">
+        <option value="">No change</option>
+        <option value="Off Road">Off Road</option>
+        <option value="Under Repair">Under Repair</option>
+        <option value="On Road">On Road</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Supplementary Estimate (₹) — if needed</label>
+      <input type="number" id="log-supp" placeholder="Additional amount if raised">
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-blue" onclick="submitLog()">POST UPDATE</button>
+      <button class="btn btn-outline" onclick="closeModal('log-modal')">CANCEL</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+//  ⚙️  CONFIG — Paste your Apps Script URL
+// ═══════════════════════════════════════════
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycb.../exec';
+// After deploying Apps Script, replace above with:
+// 'https://script.google.com/macros/s/XXXX/exec'
+
+// ─── CREDENTIALS ───
+const CREDENTIALS = {
+  // Field team — shared PIN
+  'field': { password: 'field108', role: 'field' },
+  // Fleet Desk — full access
+  'fleet_admin': { password: 'fleet@108', role: 'fleet' }
+};
+
+// ─── STATE ───
+let currentRole = null;
+let allData = [];
+let filteredData = [];
+let editingId = null;
+let logTargetId = null;
+let charts = {};
+
+// ─── DEMO DATA ───
+const DEMO_DATA = [
+  {id:'ROW_2',date:'2026-05-01',regno:'MH14CL1051',cluster:'C1',district:'Pune',make:'Force Motors',model:'Traveller',dm:'Sunil Patil',adm:'Kiran More',odo:'48200',bddate:'2026-05-01',bdtime:'09:30',complaint:'Clutch plate problem — vehicle not engaging gear properly',action:'Replacement required',towing:'Yes',towvendor:'Shree Towing',workshop:'Balaji Motors',status:'On Road',approval:'Closed',estimate:'12000',advance:'5000',supp:'',invoice:'10500',offdays:'2',remarks:'',logs:'[{"ts":"2026-05-01T10:00","by":"Field","note":"Sent to Balaji Motors"},{"ts":"2026-05-02T15:00","by":"Fleet","note":"Invoice approved ₹10,500 after negotiation"}]'},
+  {id:'ROW_3',date:'2026-05-10',regno:'MH14CL0799',cluster:'C2',district:'Pune',make:'Force Motors',model:'Traveller',dm:'Sunil Patil',adm:'Kiran More',odo:'52100',bddate:'2026-05-10',bdtime:'14:15',complaint:'Electrical issue — dashboard lights flickering, horn not working',action:'Rewired loose connections',towing:'No',towvendor:'',workshop:'Spark Auto Electricals',status:'On Road',approval:'Closed',estimate:'1500',advance:'',supp:'',invoice:'1100',offdays:'1',remarks:'Minor',logs:'[{"ts":"2026-05-10T16:00","by":"Fleet","note":"Approved negotiated ₹1,100"}]'},
+  {id:'ROW_4',date:'2026-06-01',regno:'MH14CL1417',cluster:'C1',district:'Pune',make:'Force Motors',model:'Traveller',dm:'Manoj Desai',adm:'Kiran More',odo:'61800',bddate:'2026-06-01',bdtime:'11:00',complaint:'Engine overheating — coolant leak detected',action:'Towed to workshop',towing:'Yes',towvendor:'Shree Towing',workshop:'Balaji Motors',status:'Under Repair',approval:'Pending',estimate:'22000',advance:'8000',supp:'4000',invoice:'',offdays:'4',remarks:'Parts being sourced',logs:'[{"ts":"2026-06-01T12:00","by":"Field","note":"Towed to Balaji. Estimate ₹22,000 raised."},{"ts":"2026-06-02T09:00","by":"Field","note":"Additional ₹4,000 for coolant hose replacement needed","supp":"4000"}]'},
+  {id:'ROW_5',date:'2026-06-03',regno:'MH14CL2088',cluster:'C3',district:'Pune',make:'Force Motors',model:'Traveller',dm:'Ravi Kumar',adm:'Kiran More',odo:'39400',bddate:'2026-06-03',bdtime:'07:45',complaint:'Tyre burst — rear left tyre completely shredded on highway',action:'Spare tyre fitted, vehicle driveable',towing:'No',towvendor:'',workshop:'Quick Tyre Centre',status:'Under Repair',approval:'Pending',estimate:'3800',advance:'',supp:'',invoice:'',offdays:'1',remarks:'',logs:'[]'},
+];
+
+// ─── HELPERS ───
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (type==='error'?' error':type==='info'?' info':'');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(()=>t.className='toast', 3500);
+}
+function showLoading(v) { document.getElementById('loading').classList.toggle('active',v); }
+function isConfigured() { return APPS_SCRIPT_URL && APPS_SCRIPT_URL !== 'YOUR_APPS_SCRIPT_URL_HERE'; }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function inr(v) { const n=parseFloat(v); return isNaN(n)?'—':'₹'+n.toLocaleString('en-IN'); }
+function approvalBadge(v) {
+  const cls = {Pending:'badge-pending',Approved:'badge-approved',Closed:'badge-closed'}[v]||'badge-pending';
+  return `<span class="badge ${cls}">${v||'Pending'}</span>`;
+}
+function statusBadge(v) {
+  const cls = v==='On Road'?'badge-onroad':v==='Under Repair'?'badge-under':'badge-offroad';
+  return `<span class="badge ${cls}">${v||'—'}</span>`;
+}
+function fmtDate(d) { return d?new Date(d).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):'-'; }
+
+// ─── ROLE SELECTION ───
+let selectedRole = 'field';
+function selectRole(r) {
+  selectedRole = r;
+  document.getElementById('role-field').classList.toggle('active', r==='field');
+  document.getElementById('role-fleet').classList.toggle('active', r==='fleet');
+  document.getElementById('fleet-username-wrap').style.display = r==='fleet' ? 'block' : 'none';
+}
+
+// ─── LOGIN ───
+function doLogin() {
+  const pass = document.getElementById('login-pass').value;
+  const errEl = document.getElementById('login-error');
+  errEl.style.display = 'none';
+
+  if (selectedRole === 'field') {
+    if (pass === CREDENTIALS['field'].password) {
+      currentRole = 'field';
+      launchApp();
+    } else {
+      errEl.textContent = 'Wrong PIN. Contact Fleet HQ.';
+      errEl.style.display = 'block';
+    }
+  } else {
+    const user = document.getElementById('login-user').value.trim();
+    if (CREDENTIALS[user] && CREDENTIALS[user].password === pass && CREDENTIALS[user].role === 'fleet') {
+      currentRole = 'fleet';
+      launchApp();
+    } else {
+      errEl.textContent = 'Invalid credentials. Access denied.';
+      errEl.style.display = 'block';
+    }
+  }
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('login-screen').style.display !== 'none') doLogin();
+});
+
+function logout() {
+  currentRole = null; allData = [];
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-pass').value = '';
+  if (document.getElementById('login-user')) document.getElementById('login-user').value = '';
+  selectedRole = 'field';
+  selectRole('field');
+}
+
+// ─── LAUNCH ───
+function launchApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('user-label').textContent = currentRole === 'fleet' ? 'FLEET DESK' : 'FIELD TEAM';
+
+  const bw = document.getElementById('banner-wrap');
+  bw.innerHTML = '';
+  if (!isConfigured()) {
+    bw.innerHTML = '<div class="banner banner-warn">⚠️ Google Sheet not connected — running in demo mode. Set your Apps Script URL in CONFIG to enable live sync.</div>';
+  }
+
+  const nav = document.getElementById('nav-tabs');
+  nav.innerHTML = '';
+
+  if (currentRole === 'fleet') {
+    document.getElementById('stats-bar').style.display = 'grid';
+    ['dashboard','datasheet','approvals','reports'].forEach((id,i)=>{
+      const labels = ['Dashboard','Data Sheet','Approvals','Reports'];
+      const btn = document.createElement('button');
+      btn.className = 'nav-tab' + (i===0?' active':'');
+      btn.dataset.tab = id;
+      btn.textContent = labels[i];
+      btn.onclick = () => showTab(id);
+      nav.appendChild(btn);
+    });
+    loadData();
+    showTab('dashboard');
+  } else {
+    document.getElementById('stats-bar').style.display = 'none';
+    ['raise','myrequests'].forEach((id,i)=>{
+      const labels = ['Raise Request','My Requests'];
+      const btn = document.createElement('button');
+      btn.className = 'nav-tab' + (i===0?' active':'');
+      btn.dataset.tab = id;
+      btn.textContent = labels[i];
+      btn.onclick = () => showTab(id);
+      nav.appendChild(btn);
+    });
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('f-date').value = today;
+    document.getElementById('f-bddate').value = today;
+    loadData();
+    showTab('raise');
+  }
+}
+
+function showTab(tab) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  const page = document.getElementById('page-'+tab);
+  if (page) page.classList.add('active');
+  const tabEl = document.querySelector(`.nav-tab[data-tab="${tab}"]`);
+  if (tabEl) tabEl.classList.add('active');
+}
+
+// ─── LOAD DATA ───
+async function loadData() {
+  if (!isConfigured()) {
+    allData = DEMO_DATA;
+    afterLoad();
+    return;
+  }
+  showLoading(true);
+  try {
+    // Use no-cors compatible approach via JSONP-style or direct GET
+    const res = await fetch(APPS_SCRIPT_URL + '?action=getAll&t=' + Date.now());
+    const json = await res.json();
+    allData = (json.data || []).map(r => ({...r, logs: r.logs || '[]'}));
+    afterLoad();
+  } catch(e) {
+    showToast('Could not reach Google Sheet. Showing local data.', 'error');
+    allData = DEMO_DATA;
+    afterLoad();
+  }
+  showLoading(false);
+}
+
+function afterLoad() {
+  if (currentRole === 'fleet') {
+    updateStats(allData);
+    renderTable(allData);
+    renderCharts(allData);
+    renderApprovals(allData);
+    populateClusterFilter(allData);
+  } else {
+    renderFieldRequests(allData);
+  }
+}
+
+// ─── STATS ───
+function updateStats(data) {
+  const total = data.length;
+  const onRoad = data.filter(d=>d.status==='On Road').length;
+  const offRoad = data.filter(d=>d.status==='Off Road').length;
+  const repair = data.filter(d=>d.status==='Under Repair').length;
+  const pending = data.filter(d=>!d.approval||d.approval==='Pending').length;
+  const totalInv = data.reduce((s,d)=>s+(parseFloat(d.invoice)||0),0);
+  const totalEst = data.reduce((s,d)=>s+(parseFloat(d.estimate)||0),0);
+  const saved = Math.max(0, totalEst - totalInv);
+
+  document.getElementById('s-total').textContent = total;
+  document.getElementById('s-onroad').textContent = onRoad;
+  document.getElementById('s-offroad').textContent = offRoad;
+  document.getElementById('s-repair').textContent = repair;
+  document.getElementById('s-pending').textContent = pending;
+  document.getElementById('s-invoice').textContent = totalInv>0?'₹'+totalInv.toLocaleString('en-IN'):'—';
+  document.getElementById('s-saved').textContent = saved>0?'₹'+saved.toLocaleString('en-IN'):'—';
+
+  document.getElementById('dm-offroad').textContent = offRoad;
+  document.getElementById('dm-repair').textContent = repair;
+  document.getElementById('dm-pending').textContent = pending;
+  document.getElementById('dm-onroad').textContent = onRoad;
+}
+
+// ─── TABLE ───
+function renderTable(data) {
+  filteredData = data;
+  const tbody = document.getElementById('data-tbody');
+  const empty = document.getElementById('tbl-empty');
+  const count = document.getElementById('tbl-count');
+  if (!data.length) { tbody.innerHTML=''; empty.style.display='block'; count.textContent=''; return; }
+  empty.style.display = 'none';
+  count.textContent = `${data.length} record${data.length!==1?'s':''}`;
+
+  tbody.innerHTML = data.map((r,i)=>{
+    const est = parseFloat(r.estimate)||0;
+    const inv = parseFloat(r.invoice)||0;
+    const saving = est && inv ? est-inv : null;
+    const savingHtml = saving!==null ? `<span class="${saving>0?'delta-positive':'delta-negative'}">${saving>0?'+':''} ₹${Math.abs(saving).toLocaleString('en-IN')}</span>` : '—';
+    return `<tr>
+      <td style="color:var(--muted)">${i+1}</td>
+      <td>${fmtDate(r.date)}</td>
+      <td><strong style="font-family:'Rajdhani';letter-spacing:1px">${r.regno||'—'}</strong></td>
+      <td>${r.cluster||'—'}</td>
+      <td style="max-width:200px;white-space:normal;font-size:12px">${(r.complaint||'—').substring(0,70)}${r.complaint&&r.complaint.length>70?'…':''}</td>
+      <td style="font-size:12px">${r.workshop||'—'}</td>
+      <td>${statusBadge(r.status)}</td>
+      <td>${approvalBadge(r.approval||'Pending')}</td>
+      <td>${r.estimate?'₹'+parseFloat(r.estimate).toLocaleString('en-IN'):'—'}</td>
+      <td><strong>${r.invoice?'₹'+parseFloat(r.invoice).toLocaleString('en-IN'):'—'}</strong></td>
+      <td>${savingHtml}</td>
+      <td>${r.offdays||'—'}</td>
+      <td>
+        <div style="display:flex;gap:5px">
+          <button class="btn btn-warning btn-sm" onclick="openEditModal('${r.id}')">✏ Edit</button>
+          <button class="btn btn-outline btn-sm" onclick="viewLogs('${r.id}')">📋 Logs</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteEntry('${r.id}')">✕</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function filterTable() {
+  const q = document.getElementById('search-input').value.toLowerCase();
+  const st = document.getElementById('f-status-filter').value;
+  const ap = document.getElementById('f-approval-filter').value;
+  const filtered = allData.filter(r=>{
+    const mq = !q || Object.values(r).some(v=>String(v).toLowerCase().includes(q));
+    const ms = !st || r.status===st;
+    const ma = !ap || (r.approval||'Pending')===ap;
+    return mq && ms && ma;
+  });
+  renderTable(filtered);
+}
+
+// ─── APPROVALS ───
+function renderApprovals(data) {
+  const pending = data.filter(d=>!d.approval||d.approval==='Pending');
+  const list = document.getElementById('approvals-list');
+  const empty = document.getElementById('approvals-empty');
+  if (!pending.length) { list.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display = 'none';
+  list.innerHTML = pending.map(r=>{
+    const suppTotal = (parseFloat(r.supp)||0);
+    const totalEst = (parseFloat(r.estimate)||0) + suppTotal;
+    const logs = safeParseLog(r.logs);
+    return `
+    <div class="approval-card">
+      <div class="approval-hdr">
+        <div>
+          <div class="approval-id">REQ — ${r.regno||'UNKNOWN'}</div>
+          <div class="approval-meta">Raised: ${fmtDate(r.date)} &nbsp;|&nbsp; Cluster: ${r.cluster||'—'} &nbsp;|&nbsp; Workshop: ${r.workshop||'—'}</div>
+        </div>
+        ${statusBadge(r.status)}
+      </div>
+      <div class="approval-body">
+        <div><div class="ab-lbl">Complaint</div><div class="ab-val" style="font-size:13px;font-family:'DM Sans';font-weight:500">${(r.complaint||'—').substring(0,60)}…</div></div>
+        <div><div class="ab-lbl">Initial Estimate</div><div class="ab-val sv-gold">${inr(r.estimate)}</div></div>
+        <div><div class="ab-lbl">Supplementary</div><div class="ab-val sv-gold">${suppTotal>0?inr(suppTotal):'—'}</div></div>
+        <div><div class="ab-lbl">Total Requested</div><div class="ab-val sv-red">${inr(totalEst)}</div></div>
+      </div>
+      ${logs.length?`<div style="font-size:11px;color:var(--muted);margin-bottom:12px;padding:8px;background:var(--surface2);border:1px solid var(--border)"><strong style="color:var(--muted2)">Latest update:</strong> ${logs[logs.length-1].note}</div>`:''}
+      <div class="approval-actions">
+        <button class="btn btn-success btn-sm" onclick="openApproveModal('${r.id}')">✓ APPROVE & SET INVOICE</button>
+        <button class="btn btn-outline btn-sm" onclick="viewLogs('${r.id}')">📋 View Logs</button>
+        <button class="btn btn-outline btn-sm" onclick="openEditModal('${r.id}')">✏ Edit Details</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function safeParseLog(s) {
+  try { return JSON.parse(s||'[]'); } catch { return []; }
+}
+
+// ─── APPROVE MODAL ───
+function openApproveModal(id) {
+  const row = allData.find(d=>d.id===id);
+  if (!row) return;
+  editingId = id;
+  document.getElementById('edit-modal-title').textContent = 'APPROVE & CLOSE REQUEST';
+  const suppTotal = (parseFloat(row.estimate)||0)+(parseFloat(row.supp)||0);
+  document.getElementById('edit-modal-body').innerHTML = `
+    <div style="margin-bottom:20px">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px">
+        <div class="rs-card"><div class="rs-lbl">Vehicle</div><div class="rs-val" style="font-size:20px">${row.regno}</div></div>
+        <div class="rs-card"><div class="rs-lbl">Workshop</div><div class="rs-val" style="font-size:16px">${row.workshop||'—'}</div></div>
+        <div class="rs-card"><div class="rs-lbl">Total Estimated</div><div class="rs-val sv-gold">${inr(suppTotal)}</div></div>
+      </div>
+      <div style="background:var(--surface2);border:1px solid var(--border);padding:14px 16px;margin-bottom:16px;font-size:13px;line-height:1.6;color:var(--muted2)">
+        <strong style="color:var(--text);font-family:'Rajdhani';letter-spacing:1px">COMPLAINT:</strong> ${row.complaint}
+      </div>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label req">Final Invoice Amount (₹)</label>
+          <input type="number" id="ap-invoice" placeholder="Actual amount paid to workshop" value="${row.invoice||''}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Off Road Days (final)</label>
+          <input type="number" id="ap-offdays" value="${row.offdays||''}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Negotiated Amount (₹)</label>
+          <input type="number" id="ap-negotiated" placeholder="Amount negotiated" value="${row.negotiated||''}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Final Status</label>
+          <select id="ap-status">
+            <option ${row.status==='On Road'?'selected':''}>On Road</option>
+            <option ${row.status==='Off Road'?'selected':''}>Off Road</option>
+            <option ${row.status==='Under Repair'?'selected':''}>Under Repair</option>
+          </select>
+        </div>
+        <div class="form-group span2">
+          <label class="form-label">Fleet Desk Remarks</label>
+          <input type="text" id="ap-remarks" value="${row.remarks||''}" placeholder="Notes from Fleet Desk…">
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-success" onclick="submitApproval()">✓ APPROVE & CLOSE</button>
+      <button class="btn btn-outline btn-sm" onclick="submitApproval('Approved')">APPROVE (KEEP OPEN)</button>
+      <button class="btn btn-outline" onclick="closeModal('edit-modal')">CANCEL</button>
+    </div>
+  `;
+  document.getElementById('edit-modal').classList.add('open');
+}
+
+async function submitApproval(approvalStatus='Closed') {
+  const invoice = document.getElementById('ap-invoice').value;
+  const offdays = document.getElementById('ap-offdays').value;
+  const negotiated = document.getElementById('ap-negotiated').value;
+  const status = document.getElementById('ap-status').value;
+  const remarks = document.getElementById('ap-remarks').value;
+
+  if (!invoice) { showToast('Final Invoice amount is required', 'error'); return; }
+
+  const row = allData.find(d=>d.id===editingId);
+  const logEntry = {ts: new Date().toISOString(), by:'Fleet', note:`Approved. Final invoice: ₹${parseFloat(invoice).toLocaleString('en-IN')}. Status: ${status}.`};
+  const logs = safeParseLog(row.logs);
+  logs.push(logEntry);
+
+  const updates = { ...row, invoice, offdays, negotiated, status, remarks, approval: approvalStatus, logs: JSON.stringify(logs) };
+  await doUpdate(updates);
+  closeModal('edit-modal');
+}
+
+// ─── EDIT MODAL (Fleet) ───
+function openEditModal(id) {
+  const row = allData.find(d=>d.id===id);
+  if (!row) return;
+  editingId = id;
+  document.getElementById('edit-modal-title').textContent = 'EDIT REQUEST';
+  document.getElementById('edit-modal-body').innerHTML = `
+    <div class="form-grid">
+      <div class="sec-div">Vehicle & Location</div>
+      <div class="form-group"><label class="form-label">Date</label><input type="date" id="e-date" value="${row.date||''}"></div>
+      <div class="form-group"><label class="form-label">Reg No</label><input type="text" id="e-regno" value="${row.regno||''}"></div>
+      <div class="form-group"><label class="form-label">Cluster</label><input type="text" id="e-cluster" value="${row.cluster||''}"></div>
+      <div class="form-group"><label class="form-label">District</label><input type="text" id="e-district" value="${row.district||''}"></div>
+      <div class="form-group"><label class="form-label">Make</label><input type="text" id="e-make" value="${row.make||''}"></div>
+      <div class="form-group"><label class="form-label">Model</label><input type="text" id="e-model" value="${row.model||''}"></div>
+
+      <div class="sec-div">Breakdown</div>
+      <div class="form-group"><label class="form-label">BD Date</label><input type="date" id="e-bddate" value="${row.bddate||''}"></div>
+      <div class="form-group"><label class="form-label">BD Time</label><input type="time" id="e-bdtime" value="${row.bdtime||''}"></div>
+      <div class="form-group"><label class="form-label">Odometer</label><input type="number" id="e-odo" value="${row.odo||''}"></div>
+      <div class="form-group span3"><label class="form-label">Complaint</label><textarea id="e-complaint">${row.complaint||''}</textarea></div>
+      <div class="form-group span3"><label class="form-label">Action Taken</label><textarea id="e-action">${row.action||''}</textarea></div>
+
+      <div class="sec-div">Workshop & Costs</div>
+      <div class="form-group"><label class="form-label">Towing</label><select id="e-towing"><option ${row.towing==='No'?'selected':''}>No</option><option ${row.towing==='Yes'?'selected':''}>Yes</option></select></div>
+      <div class="form-group"><label class="form-label">Tow Vendor</label><input type="text" id="e-towvendor" value="${row.towvendor||''}"></div>
+      <div class="form-group"><label class="form-label">Workshop</label><input type="text" id="e-workshop" value="${row.workshop||''}"></div>
+      <div class="form-group"><label class="form-label">Status</label><select id="e-status"><option ${row.status==='On Road'?'selected':''}>On Road</option><option ${row.status==='Off Road'?'selected':''}>Off Road</option><option ${row.status==='Under Repair'?'selected':''}>Under Repair</option></select></div>
+      <div class="form-group"><label class="form-label">Approval</label><select id="e-approval"><option ${(!row.approval||row.approval==='Pending')?'selected':''}>Pending</option><option ${row.approval==='Approved'?'selected':''}>Approved</option><option ${row.approval==='Closed'?'selected':''}>Closed</option></select></div>
+      <div class="form-group"><label class="form-label">Estimate (₹)</label><input type="number" id="e-estimate" value="${row.estimate||''}"></div>
+      <div class="form-group"><label class="form-label">Advance (₹)</label><input type="number" id="e-advance" value="${row.advance||''}"></div>
+      <div class="form-group"><label class="form-label">Supplementary (₹)</label><input type="number" id="e-supp" value="${row.supp||''}"></div>
+      <div class="form-group"><label class="form-label">Negotiated (₹)</label><input type="number" id="e-negotiated" value="${row.negotiated||''}"></div>
+      <div class="form-group"><label class="form-label">Final Invoice (₹)</label><input type="number" id="e-invoice" value="${row.invoice||''}"></div>
+      <div class="form-group"><label class="form-label">Off Road Days</label><input type="number" id="e-offdays" value="${row.offdays||''}"></div>
+      <div class="form-group span3"><label class="form-label">DM / ADM</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <input type="text" id="e-dm" placeholder="DM Name" value="${row.dm||''}">
+          <input type="text" id="e-adm" placeholder="ADM Name" value="${row.adm||''}">
+        </div>
+      </div>
+      <div class="form-group span3"><label class="form-label">Remarks</label><input type="text" id="e-remarks" value="${row.remarks||''}"></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn btn-warning" onclick="submitEdit()">UPDATE ENTRY</button>
+      <button class="btn btn-outline" onclick="closeModal('edit-modal')">CANCEL</button>
+    </div>
+  `;
+  document.getElementById('edit-modal').classList.add('open');
+}
+
+async function submitEdit() {
+  const g = id => document.getElementById(id)?.value||'';
+  const row = allData.find(d=>d.id===editingId);
+  const updates = {
+    id:editingId, date:g('e-date'), regno:g('e-regno'), cluster:g('e-cluster'), district:g('e-district'),
+    make:g('e-make'), model:g('e-model'), dm:g('e-dm'), adm:g('e-adm'), odo:g('e-odo'),
+    bddate:g('e-bddate'), bdtime:g('e-bdtime'), complaint:g('e-complaint'), action:g('e-action'),
+    towing:g('e-towing'), towvendor:g('e-towvendor'), workshop:g('e-workshop'), status:g('e-status'),
+    approval:g('e-approval'), estimate:g('e-estimate'), advance:g('e-advance'), supp:g('e-supp'),
+    negotiated:g('e-negotiated'), invoice:g('e-invoice'), offdays:g('e-offdays'), remarks:g('e-remarks'),
+    logs: row?.logs || '[]'
+  };
+  await doUpdate(updates);
+  closeModal('edit-modal');
+}
+
+// ─── LOGS ───
+function viewLogs(id) {
+  logTargetId = id;
+  const row = allData.find(d=>d.id===id);
+  if (!row) return;
+  const logs = safeParseLog(row.logs);
+
+  const isField = currentRole === 'field';
+  const modal = document.getElementById('log-modal');
+  document.querySelector('#log-modal .modal').innerHTML = `
+    <div class="modal-hdr">
+      <div class="modal-ttl">LOGS — ${row.regno}</div>
+      <button class="modal-close" onclick="closeModal('log-modal')">✕</button>
+    </div>
+    <div style="margin-bottom:16px;font-size:12px;color:var(--muted)">Complaint: ${row.complaint}</div>
+    <div style="max-height:260px;overflow-y:auto;margin-bottom:18px">
+      ${logs.length ? logs.map(l=>`
+        <div class="log-entry" style="border-left-color:${l.by==='Fleet'?'var(--gold)':'var(--blue)'}">
+          <div class="log-entry-meta">${l.by} — ${new Date(l.ts).toLocaleString('en-IN')}${l.supp?` &nbsp;| Supplementary: ₹${parseFloat(l.supp).toLocaleString('en-IN')}`:''}</div>
+          <div class="log-entry-text">${l.note}</div>
+        </div>`).join('') : '<div class="empty"><p>No updates yet.</p></div>'}
+    </div>
+    ${isField?`
+      <div style="border-top:1px solid var(--border);padding-top:16px">
+        <div class="form-card-title" style="font-size:10px">ADD UPDATE</div>
+        <div class="form-group"><label class="form-label">Update Note *</label><textarea id="log-text" style="min-height:80px" placeholder="Repair progress, additional parts, updates…"></textarea></div>
+        <div class="form-group">
+          <label class="form-label">Updated Status</label>
+          <select id="log-status"><option value="">No change</option><option>Off Road</option><option>Under Repair</option><option>On Road</option></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Supplementary Estimate (₹)</label>
+          <input type="number" id="log-supp" placeholder="Additional amount if any">
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-blue" onclick="submitLog('${id}')">POST UPDATE</button>
+          <button class="btn btn-outline btn-sm" onclick="closeModal('log-modal')">CLOSE</button>
+        </div>
+      </div>` : `<button class="btn btn-outline" onclick="closeModal('log-modal')">CLOSE</button>`}
+  `;
+  modal.classList.add('open');
+}
+
+async function submitLog(id) {
+  const note = document.getElementById('log-text').value.trim();
+  const status = document.getElementById('log-status')?.value || '';
+  const supp = document.getElementById('log-supp')?.value || '';
+
+  if (!note) { showToast('Please write an update note', 'error'); return; }
+
+  const row = allData.find(d=>d.id===id);
+  if (!row) return;
+  const logs = safeParseLog(row.logs);
+  const entry = { ts: new Date().toISOString(), by: currentRole==='fleet'?'Fleet':'Field', note };
+  if (supp) entry.supp = supp;
+  logs.push(entry);
+
+  const updates = { ...row, logs: JSON.stringify(logs) };
+  if (status) updates.status = status;
+  if (supp) {
+    const existing = parseFloat(row.supp)||0;
+    updates.supp = String(existing + parseFloat(supp));
+  }
+
+  await doUpdate(updates);
+  closeModal('log-modal');
+  showToast('Update posted ✓');
+}
+
+// ─── FIELD REQUESTS VIEW ───
+function renderFieldRequests(data) {
+  const list = document.getElementById('field-requests-list');
+  const empty = document.getElementById('field-requests-empty');
+  if (!list) return;
+  if (!data.length) { list.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  list.innerHTML = data.map(r=>{
+    const logs = safeParseLog(r.logs);
+    const lastLog = logs.length ? logs[logs.length-1] : null;
+    return `
+    <div class="approval-card" style="border-left-color:${r.approval==='Closed'?'var(--green)':r.approval==='Approved'?'var(--blue)':'var(--gold)'}">
+      <div class="approval-hdr">
+        <div>
+          <div class="approval-id">${r.regno} — ${fmtDate(r.date)}</div>
+          <div class="approval-meta">${r.cluster?'Cluster '+r.cluster+' &nbsp;|&nbsp; ':''} Workshop: ${r.workshop||'—'}</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">${statusBadge(r.status)} ${approvalBadge(r.approval||'Pending')}</div>
+      </div>
+      <div class="approval-body">
+        <div><div class="ab-lbl">Complaint</div><div class="ab-val" style="font-size:12px;font-family:'DM Sans'">${(r.complaint||'—').substring(0,50)}…</div></div>
+        <div><div class="ab-lbl">Your Estimate</div><div class="ab-val sv-gold">${inr(r.estimate)}</div></div>
+        <div><div class="ab-lbl">Final Invoice</div><div class="ab-val ${r.invoice?'sv-blue':''}">${r.invoice?inr(r.invoice):'Pending'}</div></div>
+        <div><div class="ab-lbl">Off Road Days</div><div class="ab-val">${r.offdays||'—'}</div></div>
+      </div>
+      ${lastLog?`<div style="font-size:11px;color:var(--muted);margin-bottom:12px;padding:8px 10px;background:var(--surface2);border:1px solid var(--border)">
+        <strong style="color:var(--muted2)">${lastLog.by}:</strong> ${lastLog.note}
+      </div>`:''}
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-blue btn-sm" onclick="viewLogs('${r.id}')">📋 View / Add Update</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─── CHARTS ───
+function renderCharts(data) {
+  destroyCharts();
+
+  // Monthly Cost Chart (Estimate vs Invoice)
+  const months = {};
+  data.forEach(d=>{
+    if (!d.date) return;
+    const m = d.date.substring(0,7);
+    if (!months[m]) months[m] = {est:0,inv:0};
+    months[m].est += parseFloat(d.estimate)||0;
+    months[m].inv += parseFloat(d.invoice)||0;
+  });
+  const mKeys = Object.keys(months).sort().slice(-8);
+  const mLabels = mKeys.map(m=>{ const [y,mo]=m.split('-'); return ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(mo)]+' '+y.slice(2); });
+  buildChart('chart-monthly','bar',mLabels,[
+    {label:'Estimate',data:mKeys.map(m=>months[m].est),backgroundColor:'rgba(245,166,35,0.7)',borderColor:'#f5a623',borderWidth:1.5,borderRadius:3},
+    {label:'Final Invoice',data:mKeys.map(m=>months[m].inv),backgroundColor:'rgba(59,130,246,0.7)',borderColor:'#3b82f6',borderWidth:1.5,borderRadius:3}
+  ],'₹',true);
+
+  // Status donut
+  const st = {onroad:data.filter(d=>d.status==='On Road').length,offroad:data.filter(d=>d.status==='Off Road').length,repair:data.filter(d=>d.status==='Under Repair').length};
+  buildChart('chart-status','doughnut',['On Road','Off Road','Under Repair'],[{data:[st.onroad,st.offroad,st.repair],backgroundColor:['#00c67a','#e63946','#8b5cf6'],borderWidth:0,hoverOffset:6}],null,true);
+
+  // Complaint frequency
+  const comp = {};
+  data.forEach(d=>{
+    let k=(d.complaint||'').split('—')[0].split('-')[0].trim().substring(0,25)||'Other';
+    comp[k]=(comp[k]||0)+1;
+  });
+  const topC = Object.entries(comp).sort((a,b)=>b[1]-a[1]).slice(0,7);
+  buildChart('chart-complaint','bar',topC.map(x=>x[0]),[{data:topC.map(x=>x[1]),backgroundColor:['#e63946','#f5a623','#3b82f6','#00c67a','#8b5cf6','#06b6d4','#f97316'],borderRadius:3}],null,false);
+
+  // Cost per vehicle
+  const cv = {};
+  data.forEach(d=>{ if(d.regno) cv[d.regno]=(cv[d.regno]||0)+(parseFloat(d.invoice)||0); });
+  const topV = Object.entries(cv).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  buildChart('chart-cost','bar',topV.map(x=>x[0]),[{data:topV.map(x=>x[1]),backgroundColor:'rgba(59,130,246,0.75)',borderRadius:3}],'₹',false);
+
+  // Towing donut
+  const tw = {yes:data.filter(d=>d.towing==='Yes').length, no:data.filter(d=>d.towing!=='Yes').length};
+  buildChart('chart-towing','doughnut',['Towing Yes','Towing No'],[{data:[tw.yes,tw.no],backgroundColor:['#f5a623','#1e3a5f'],borderWidth:0,hoverOffset:6}],null,true);
+}
+
+function destroyCharts() {
+  Object.values(charts).forEach(c=>c&&c.destroy&&c.destroy());
+  charts = {};
+}
+
+function buildChart(id, type, labels, datasets, prefix, legend) {
+  const ctx = document.getElementById(id);
+  if (!ctx) return;
+  charts[id] = new Chart(ctx, {
+    type,
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: { display: legend, position:'bottom', labels:{ color:'#5a7296', font:{family:'DM Sans',size:11}, boxWidth:10, padding:14 } },
+        tooltip: {
+          backgroundColor:'rgba(14,21,32,0.95)',
+          borderColor:'rgba(31,46,66,1)',
+          borderWidth:1,
+          titleColor:'#e2eaf6',
+          bodyColor:'#8ba0bb',
+          callbacks:{ label: ctx => prefix ? (prefix + ctx.raw.toLocaleString('en-IN')) : ctx.raw }
+        }
+      },
+      scales: type!=='doughnut' ? {
+        x:{ ticks:{color:'#5a7296',font:{size:10}}, grid:{color:'rgba(31,46,66,.6)'},  maxRotation:35 },
+        y:{ ticks:{color:'#5a7296', callback:v=>prefix?prefix+v.toLocaleString('en-IN'):v}, grid:{color:'rgba(31,46,66,.6)'} }
+      } : {}
+    }
+  });
+}
+
+// ─── SAVE ENTRY (Field) ───
+async function saveEntry() {
+  const req = [{id:'f-date',label:'Date'},{id:'f-regno',label:'Vehicle Reg No'},{id:'f-bddate',label:'Breakdown Date'},{id:'f-complaint',label:'Complaint'},{id:'f-estimate',label:'Estimate Amount'}];
+  for (const {id,label} of req) {
+    if (!document.getElementById(id).value.trim()) {
+      showToast(`${label} is required`, 'error');
+      document.getElementById(id).focus();
+      return;
+    }
+  }
+  const g = id => document.getElementById(id)?.value||'';
+  const entry = {
+    date:g('f-date'), regno:g('f-regno'), cluster:g('f-cluster'), district:g('f-district'),
+    make:g('f-make'), model:g('f-model'), dm:'', adm:'', odo:g('f-odo'),
+    bddate:g('f-bddate'), bdtime:g('f-bdtime'), complaint:g('f-complaint'), action:g('f-action'),
+    towing:g('f-towing'), towvendor:g('f-towvendor'), workshop:g('f-workshop'),
+    status:'Off Road', approval:'Pending',
+    estimate:g('f-estimate'), advance:g('f-advance'), supp:'', negotiated:'', invoice:'',
+    offdays:'', remarks:g('f-remarks'),
+    logs: JSON.stringify([{ts:new Date().toISOString(),by:'Field',note:'Request raised. Estimate: ₹'+parseFloat(g('f-estimate')).toLocaleString('en-IN')}])
+  };
+
+  if (!isConfigured()) {
+    entry.id = 'ROW_' + Date.now();
+    allData.push(entry);
+    clearForm();
+    showToast('Request submitted! (Demo mode — not saved to Google Sheet)','info');
+    renderFieldRequests(allData);
+    return;
+  }
+
+  showLoading(true);
+  try {
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method:'POST',
+      headers:{'Content-Type':'text/plain'}, // avoids CORS preflight
+      body: JSON.stringify({action:'addRow',data:entry})
+    });
+    const json = await res.json();
+    if (json.success) {
+      showToast('Request submitted to Fleet Desk ✓');
+      clearForm();
+      await loadData();
+    } else {
+      showToast('Submit failed: '+(json.error||''), 'error');
+    }
+  } catch(e) {
+    showToast('Network error. Check connection.', 'error');
+  }
+  showLoading(false);
+}
+
+// ─── UPDATE ───
+async function doUpdate(entry) {
+  if (!isConfigured()) {
+    const idx = allData.findIndex(d=>d.id===entry.id);
+    if (idx>-1) allData[idx] = {...allData[idx],...entry};
+    afterLoad();
+    showToast('Updated (demo mode)');
+    return;
+  }
+  showLoading(true);
+  try {
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method:'POST',
+      headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify({action:'updateRow',data:entry})
+    });
+    const json = await res.json();
+    if (json.success) {
+      showToast('Updated ✓');
+      await loadData();
+    } else {
+      showToast('Update failed: '+(json.error||''), 'error');
+    }
+  } catch(e) {
+    showToast('Network error', 'error');
+  }
+  showLoading(false);
+}
+
+// ─── DELETE ───
+async function deleteEntry(id) {
+  if (!confirm('Delete this entry? This cannot be undone.')) return;
+  if (!isConfigured()) {
+    allData = allData.filter(d=>d.id!==id);
+    afterLoad();
+    showToast('Deleted (demo mode)');
+    return;
+  }
+  showLoading(true);
+  try {
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method:'POST',
+      headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify({action:'deleteRow',id})
+    });
+    const json = await res.json();
+    if (json.success) { showToast('Deleted ✓'); await loadData(); }
+    else showToast('Delete failed', 'error');
+  } catch { showToast('Network error', 'error'); }
+  showLoading(false);
+}
+
+// ─── REPORTS ───
+function genReport() {
+  const from = document.getElementById('rpt-from').value;
+  const to = document.getElementById('rpt-to').value;
+  const st = document.getElementById('rpt-status').value;
+  const cl = document.getElementById('rpt-cluster').value;
+  const ap = document.getElementById('rpt-approval').value;
+
+  let d = [...allData];
+  if (from) d = d.filter(r=>r.date>=from);
+  if (to) d = d.filter(r=>r.date<=to);
+  if (st) d = d.filter(r=>r.status===st);
+  if (cl) d = d.filter(r=>r.cluster===cl);
+  if (ap) d = d.filter(r=>(r.approval||'Pending')===ap);
+
+  const totalEst = d.reduce((s,r)=>s+(parseFloat(r.estimate)||0),0);
+  const totalInv = d.reduce((s,r)=>s+(parseFloat(r.invoice)||0),0);
+  const totalSaved = Math.max(0,totalEst-totalInv);
+  const offDays = d.reduce((s,r)=>s+(parseInt(r.offdays)||0),0);
+  const pending = d.filter(r=>!r.approval||r.approval==='Pending').length;
+
+  document.getElementById('report-output').innerHTML = `
+    <div class="report-summary">
+      <div class="rs-card"><div class="rs-lbl">Total Records</div><div class="rs-val">${d.length}</div></div>
+      <div class="rs-card"><div class="rs-lbl">Total Estimated</div><div class="rs-val sv-gold">${inr(totalEst)}</div></div>
+      <div class="rs-card"><div class="rs-lbl">Final Invoice Total</div><div class="rs-val sv-blue">${inr(totalInv)}</div></div>
+      <div class="rs-card"><div class="rs-lbl">Total Saved</div><div class="rs-val sv-green">${inr(totalSaved)}</div></div>
+      <div class="rs-card"><div class="rs-lbl">Total Off Road Days</div><div class="rs-val sv-red">${offDays}</div></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:14px">
+      <button class="btn btn-outline btn-sm" onclick="exportReportCSV()">⬇ Export CSV</button>
+      <button class="btn btn-outline btn-sm" onclick="window.print()">🖨 Print</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Date</th><th>Reg No</th><th>Cluster</th><th>Complaint</th><th>Status</th><th>Approval</th><th>Estimate</th><th>Final Invoice</th><th>Saved</th><th>Off Days</th></tr></thead>
+        <tbody>
+          ${d.map((r,i)=>{
+            const est=parseFloat(r.estimate)||0, inv=parseFloat(r.invoice)||0;
+            const sv = est&&inv?est-inv:null;
+            return `<tr>
+              <td style="color:var(--muted)">${i+1}</td>
+              <td>${fmtDate(r.date)}</td>
+              <td><strong style="font-family:'Rajdhani'">${r.regno||'—'}</strong></td>
+              <td>${r.cluster||'—'}</td>
+              <td style="max-width:160px;white-space:normal;font-size:11px">${(r.complaint||'—').substring(0,60)}</td>
+              <td>${statusBadge(r.status)}</td>
+              <td>${approvalBadge(r.approval||'Pending')}</td>
+              <td>${r.estimate?'₹'+parseFloat(r.estimate).toLocaleString('en-IN'):'—'}</td>
+              <td>${r.invoice?'₹'+parseFloat(r.invoice).toLocaleString('en-IN'):'—'}</td>
+              <td>${sv!==null?`<span class="${sv>0?'delta-positive':'delta-negative'}">${sv>0?'+':''}₹${Math.abs(sv).toLocaleString('en-IN')}</span>`:'—'}</td>
+              <td>${r.offdays||'—'}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+  window._reportData = d;
+}
+
+function exportReportCSV() {
+  exportDataCSV(window._reportData || [], 'fleet_report');
+}
+function exportCSV() { exportDataCSV(filteredData, 'fleet_data'); }
+function exportDataCSV(data, filename) {
+  const headers = ['Date','Reg No','Cluster','District','Make','Model','DM','ADM','Odometer','BD Date','BD Time','Complaint','Action','Towing','Tow Vendor','Workshop','Status','Approval','Estimate','Advance','Supplementary','Negotiated','Final Invoice','Off Road Days','Remarks'];
+  const keys = ['date','regno','cluster','district','make','model','dm','adm','odo','bddate','bdtime','complaint','action','towing','towvendor','workshop','status','approval','estimate','advance','supp','negotiated','invoice','offdays','remarks'];
+  const csv = [headers.join(','), ...data.map(r=>keys.map(k=>`"${(r[k]||'').replace(/"/g,'""')}"`).join(','))].join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
+  a.download = filename+'_'+new Date().toISOString().split('T')[0]+'.csv';
+  a.click();
+}
+
+// ─── CLEAR FORM ───
+function clearForm() {
+  ['f-regno','f-cluster','f-make','f-model','f-odo','f-bdtime','f-complaint','f-action','f-towvendor','f-workshop','f-advance','f-remarks'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('f-estimate').value='';
+  document.getElementById('f-district').value='Pune';
+  document.getElementById('f-towing').value='No';
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('f-date').value = today;
+  document.getElementById('f-bddate').value = today;
+}
+
+// ─── CLUSTER FILTER ───
+function populateClusterFilter(data) {
+  const clusters = [...new Set(data.map(d=>d.cluster).filter(Boolean))].sort();
+  const sel = document.getElementById('rpt-cluster');
+  if (sel) sel.innerHTML = '<option value="">All Clusters</option>' + clusters.map(c=>`<option>${c}</option>`).join('');
+}
+
+// ─── MODAL CLOSE ON OVERLAY CLICK ───
+['edit-modal','log-modal'].forEach(id=>{
+  document.getElementById(id)?.addEventListener('click', function(e){ if(e.target===this) closeModal(id); });
+});
+</script>
+
+<!--
+════════════════════════════════════════════════════════
+  GOOGLE APPS SCRIPT — COMPLETE SETUP GUIDE
+════════════════════════════════════════════════════════
+
+STEP 1 — Create Google Sheet with EXACTLY these headers in Row 1:
+  ID | Date | Reg No | Cluster | District | Make | Model | DM | ADM | Odometer |
+  BD Date | BD Time | Complaint | Action | Towing | Tow Vendor | Workshop |
+  Status | Approval | Estimate | Advance | Supplementary | Negotiated |
+  Final Invoice | Off Road Days | Remarks | Logs
+
+STEP 2 — Open Sheet → Extensions → Apps Script → New Script
+  Paste the Apps Script code below and save as Code.gs
+
+STEP 3 — Deploy: Click Deploy → New Deployment → Web App
+  Execute as: Me
+  Who has access: Anyone
+  → Copy the Web App URL
+
+STEP 4 — Replace 'YOUR_APPS_SCRIPT_URL_HERE' at top of this file with your URL
+
+════════════════════ APPS SCRIPT CODE ════════════════════
+
+const SHEET_NAME = 'Fleet';
+
+function doGet(e) {
+  const action = e.parameter.action || 'getAll';
+  if (action === 'getAll') {
+    const data = getAllRows();
+    return jsonResponse({ success: true, data });
+  }
+  return jsonResponse({ success: false, error: 'Unknown action' });
+}
+
+function doPost(e) {
+  try {
+    const body = JSON.parse(e.postData.contents);
+    const { action, data, id } = body;
+    if (action === 'addRow') return jsonResponse(addRow(data));
+    if (action === 'updateRow') return jsonResponse(updateRow(data));
+    if (action === 'deleteRow') return jsonResponse(deleteRow(id));
+    return jsonResponse({ success: false, error: 'Unknown action' });
+  } catch(err) {
+    return jsonResponse({ success: false, error: err.toString() });
+  }
+}
+
+function jsonResponse(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+const KEYS = ['id','date','regno','cluster','district','make','model','dm','adm','odo','bddate','bdtime','complaint','action','towing','towvendor','workshop','status','approval','estimate','advance','supp','negotiated','invoice','offdays','remarks','logs'];
+
+function getSheet() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  return ss.getSheetByName(SHEET_NAME) || ss.insertSheet(SHEET_NAME);
+}
+
+function getAllRows() {
+  const sheet = getSheet();
+  const rows = sheet.getDataRange().getValues();
+  if (rows.length <= 1) return [];
+  const headers = rows[0].map(h => String(h).toLowerCase().replace(/ /g,''));
+  return rows.slice(1).map(row => {
+    const obj = {};
+    KEYS.forEach(k => {
+      const idx = headers.indexOf(k === 'regno' ? 'regno' : k === 'bddate' ? 'bddate' : k === 'bdtime' ? 'bdtime' : k === 'towvendor' ? 'towvendor' : k);
+      obj[k] = idx >= 0 ? String(row[idx] || '') : '';
+    });
+    if (!obj.id) obj.id = 'ROW_' + row[0];
+    return obj;
+  });
+}
+
+function addRow(data) {
+  const sheet = getSheet();
+  const id = 'ROW_' + Date.now();
+  data.id = id;
+  sheet.appendRow(KEYS.map(k => data[k] || ''));
+  return { success: true, id };
+}
+
+function updateRow(data) {
+  const sheet = getSheet();
+  const rows = sheet.getDataRange().getValues();
+  for (let i = 1; i < rows.length; i++) {
+    if (String(rows[i][0]) === String(data.id)) {
+      KEYS.forEach((k, j) => {
+        sheet.getRange(i + 1, j + 1).setValue(data[k] || '');
+      });
+      return { success: true };
+    }
+  }
+  return { success: false, error: 'Row not found' };
+}
+
+function deleteRow(id) {
+  const sheet = getSheet();
+  const rows = sheet.getDataRange().getValues();
+  for (let i = 1; i < rows.length; i++) {
+    if (String(rows[i][0]) === String(id)) {
+      sheet.deleteRow(i + 1);
+      return { success: true };
+    }
+  }
+  return { success: false, error: 'Row not found' };
+}
+
+════════════════════════════════════════════════════════
+  IMPORTANT: After pasting and deploying, set APPS_SCRIPT_URL
+  at the top of this HTML file to your deployed Web App URL.
+  The CORS issue is fixed by using Content-Type: text/plain
+  in POST requests, which avoids the preflight OPTIONS request.
+════════════════════════════════════════════════════════
+-->
+</body>
+</html>
